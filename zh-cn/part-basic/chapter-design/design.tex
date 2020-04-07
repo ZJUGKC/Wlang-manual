@@ -1,0 +1,591 @@
+﻿%
+% Design, XIN YUAN, 2020
+%
+
+\chapter{W~语言设计}
+
+如前面所述，~W~语言兼具通用底层语言和高级应用语言的特征。因此
+本章详细描述语言的语法设计。
+
+\section{语言的生成目标}
+
+该语言的生成目标是操作系统上用户态的可执行映像以及动态装载映像。
+对于驱动级系统程序，则是另外一类和具体操作系统有关的核心态映像。
+目前主要考虑~Windows~操作系统和~X~系列操作系统。生成的各类映像
+应该包含程序代码和各类数据~(~资源~)~，并且能够被从外部访问。
+
+根据设计模式的不同，动态映像可包含普通的程序码~(~通过引出函数
+访问~)~以及资源~(~通过资源编号访问~)~和组件对象~(~通过接口规范
+访问~)~。
+
+该语言也可以像~VBA,JavaScript,VBScript~一样成为宿主应用程序下的
+脚本语言被宿主控制调用以解释或者虚拟机或者本地机器码方式执行。
+
+\section{语言的实现步骤}
+
+为了使语言可以跨各种硬件平台和操作系统，将使用如下三步来完成最终
+的编译器和链接器。
+\begin{enumerate}
+\item{用~C~语言在~windows~和~IA32~平台下实现~W~语言的子集}
+
+该步骤使用~VC~作为编译工具实现~W~语言的一个子集，即面向过程的
+部分。实现的编译器和链接器均为~windows~和~IA32(Intel Architecture)~
+下运行的程序。采用这样的设计是为了最终能利用~W~语言本身的跨平台
+特性来编写最终的多平台编译器。
+
+\item{用~W~语言在~windows~和~IA32~平台下实现多平台的~W~语言}
+
+这个步骤使用~W~语言的一个面向过程的子集，编写~W~语言本身的编译器
+和链接器。该步骤编写时就要设计为能生成不同的硬件架构下的机器码
+以及不同操作系统下的可执行映像。
+
+\item{用~W~语言编写库并生成各平台下的编译器和链接器}
+
+该步骤使用~W~语言编写运行库和开发工具。
+
+\end{enumerate}
+
+\chapter{W~语言子集基本要素}
+
+~W~语言的子集是一个面向过程的语言。因此它和~C~语言类似。它的
+基本要素包括：
+
+\begin{itemize}
+\item{数据基本类型}
+
+这里设计实现了一些基本的通用数据类型，与具体机器无关。基本数据
+类型包括：值类型和引用类型。
+
+\item{变量和常量}
+
+设计实现了变量和常量的定义和使用。
+
+\item{类型转换}
+
+设计了隐式类型转换和显式类型转换。
+
+\item{表达式}
+
+设计了操作符、算术表达式、赋值表达式、关系表达式、逻辑表达式、位
+运算以及其他特殊的表达式。
+
+\item{流程控制}
+
+设计了顺序结构、条件结构、循环结构。以及条件编译。
+
+\item{编译单元的结构}
+
+设计了编译单元的语法结构。
+
+\end{itemize}
+
+\section{数据基本类型}
+
+\input{part-basic/chapter-design/section-base/base.tex}
+
+\section{变量和常量}
+
+\input{part-basic/chapter-design/section-var/var.tex}
+
+\section{类型转换}
+
+设计了隐式类型转换和显式类型转换。
+
+\section{表达式}
+
+设计了操作符、算术表达式、赋值表达式、关系表达式、逻辑表达式、位
+运算以及其他特殊的表达式。
+
+\section{流程控制}
+
+设计了顺序结构、条件结构、循环结构。以及条件编译。
+
+\section{编译单元的结构}
+
+
+\chapter{类的设计原则}
+
+利用~ATL/WTL~编程，就是基于面向对象的编程了。类是
+主要的程序形式。在设计自己的类之前，请查看~MSDN~
+以及~ATL/WTL~的源代码，看是不是已经有实现好的相同
+功能的类和函数了，如果已经有了，就直接使用，没有
+必要自己再去写一个。如果源代码中不存在，或者已经有
+类似的类和函数但功能还不强，那么才需要自己去编写类
+和函数，或者从现有的类派生以扩展功能。本章将介绍
+如何设计高效的~WTL~类。
+
+\section{WIN32~封装原则}
+
+
+
+\section{窗口类的设计原则}
+
+数据类和显示类的分离
+
+用户控制
+CWindowImpl 派生的模板类
+一般功能的最终控制 再定制该模板类
+空的表示直接使用模板类的功能。
+
+利用现有标准控制 子类化 超类化
+直接写可创建的窗口类
+
+\section{其他原则}
+
+模板编程
+几种设计模式：
+泛型
+
+模板参数的特性较多，且每种模板参数的每种特性都可能需要定制
+函数式 CWinTrait$<>$既是如此
+特性类Trait
+
+基类作为模板参数
+派生类作为模板参数
+其他？
+什么时候用派生类模板参数 什么时候用特性类和特化、偏特化？
+需讨论 一类类型所共有的特性；有点像接口纯虚类，肯定比它们
+减少虚函数开销，区别是二进制代码上不可分离。
+功能上的策略模式，使用派生类作模板参数，也减少了虚函数开销，
+但同时它也能实现其他模式，即功能上能够被多重继承方式来扩展
+宿主模块的功能，做到真正的砖块化
+
+一般支持类 Mix-in class
+
+类的层次结构 展开后形成新的类 导致运行时类库的庞大
+要注意公共的代码
+不涉及定制的模板参数的方法 放在一个无模板的
+基类中 定制的放在派生类 模板中。减轻编译器的负担
+
+虚函数设计仍可使用 减少虚函数 用于某些概念和模式
+
+
+定制的类作为最后的派生类。模板参数是最终派生类
+
+对一类共同的东西最后加统一功能形成派生类的，将
+定制的部分作为不生成虚函数表的类，最后作为
+添加功能的类的模板参数。这种模式下定制的类一般
+作为基类或最终类的一个数据成员的类型。
+
+文件命名 将要公开库 仅自己工程中用
+
+参考STL MFC 自己编写 CSimpleArray boost Intel 数学库 图像处理库
+封装第三方的开源库 隔离不同风格的代码
+UI 改写 MFC的类
+
+大型程序：编写自己的~DLL~，封装类来调用
+导出类 分成.h .cpp
+函数的调用规范 stdcall cdecl
+DLL~的制作见附录~\ref{append:dll}~。
+
+类的两级构造和析构。为什么？
+
+\{\} \~{}\{\}
+
+Create Init
+
+Destroy Delete Dump Clear Close Release
+
+窗口类析构和窗口的Destroy不同步
+
+
+相关的类和资源释放若依赖窗口 则因为窗口已无效
+因而出错。
+
+其他类和操作系统的句柄之间也有类似不同步问题。
+
+一切析构若依赖其它类的资源，则这个类的使用最好是
+局部变量，涉及到释放资源的顺序。
+
+虚析构函数问题
+虚析构函数 引入虚函数 如果是纯粹封装 句柄 一个指针
+尽量不用虚析构函数 有多态需要才使用
+
+异常和断言 返回值检查
+
+\section{代码风格}
+
+代码的编写要遵从一定的规范，可以是自己的风格。便于
+自己和其他程序员的阅读和维护。
+
+\subsection{风格}
+
+一般遵从~windows~的编码风格。C++~类以大写字母~C~
+开头，其后紧跟一个大写字母开头的名词。对于内部类
+可以不遵从这个命名规则，可以小写字母开头或者下划线
+开头。类的方法一般是一个动宾词组。大写字母开头，
+每个词的开头字母大写，形成大小写相间的形式。结构
+一般都是大写字母开头，大小相间，或者全部大写。私有
+的方法可以小写字母开头，使用下划线连接谓词和宾语。
+
+在利用~wizard~生成的框架代码基础上添加自己的代码时，
+要用一些特殊的注释记号隔开。这样便于阅读和维护。
+例子如下。
+\ttfamily
+\begin{lstlisting}
+//code by generated
+....
+//----------------------------------------------
+// Your code
+...
+//----------------------------------------------
+\end{lstlisting}
+\CJKfamily{song}
+
+下面给出了头文件的样板写法。
+\ttfamily
+\begin{lstlisting}
+////////////////////////////////////////////////
+//
+// ATL Extension XXXX Header
+//
+////////////////////////////////////////////////
+#ifndef __ATL_EXT_XXXX_H__
+#define __ATL_EXT_XXXX_H__
+////////////////////////////////////////////////
+
+#pragma once
+
+#ifndef __cplusplus
+	#error ATL requires C++ compilation \
+     (use a .cpp suffix)
+#endif
+
+#ifndef __ATLBASE_H__
+	#error atlxxxx.h requires atlbase.h \
+     to be included first
+#endif
+
+#ifndef __ATLMISC_H__
+	#error atlxxxx.h requires atlmisc.h \
+     to be included first
+#endif
+
+XXXXX
+
+////////////////////////////////////////////////
+// Macros
+//
+// Functions
+//
+// Structures
+//
+// Classes
+//
+
+////////////////////////////////////////////////
+namespace WTL {
+////////////////////////////////////////////////
+
+
+////////////////////////////////////////////////
+}; //namespace WTL
+////////////////////////////////////////////////
+#endif //__ATL_EXT_XXXX_H__
+////////////////////////////////////////////////
+\end{lstlisting}
+\CJKfamily{song}
+
+\subsection{文档注释}
+
+为了便于代码的阅读和维护，最好加入文档式注释。按
+一定标准编写的文档可以用~doxygen~工具提取出网页
+格式或~PDF~格式的文档。有好几种格式可以编写。具体
+可参考~doxygen~的文档。在本书中采用~Qt~风格来编写。
+
+doxygen~为数据成员~(documented members)~，
+文件~(files)~，类~(classes)~和名字空间~(namespaces)~
+生成文档。有两种方法可以为它们添加文档式注释：
+
+\begin{enumerate}
+    \item 在成员，类或名字空间之前添加特殊的注释。
+也可以在文件、类和名字空间中的成员后添加注释。
+
+    \item 在文件的一个位置或者其他文件中放置一个特殊
+的文档块~(block)~，并在此文档块中放置一个结构化命令
+~(structural command)~。该结构化命令链接到一个特定的
+文档化对象~(~如成员、类、名字空间或文件~)~。
+\end{enumerate}
+
+对一个文件作文档注释只能使用第二种方法，这是因为无法
+将一个文档块放在文件之前。当然，文件的成员~(~如函数、
+变量、类型定义、宏定义等~)~同样也可以在其定义的前后
+加特殊注释即可，无须显式用结构化命令来指定。
+
+\subsubsection{特殊注释}
+
+所谓特殊的注释，是含有一些额外特殊标记的~C/C++~注释块，
+从而使得~doxygen~可以提取这些注释作为文档信息，并集中
+生成用户需要的文档格式。
+
+对于每个文档对象，都有两种注释组成文档。一是简要描述，
+一是细节描述，都是可选的。每种描述最多只在一个文档对象
+处出现一次。一个简要描述只有一行到数行，给出类或函数的
+基本信息，而细节描述则是更长更详尽的文档。这两个描述
+可用不同的注释块表示，或者在同一个注释块内用空白行分隔。
+空白行是段落的自然分隔符。注释块的位置是有优先级的，
+放在定义之前后的要比放在实现代码之前的要高。即采用定义
+之前后的注释作为文档输出。
+
+一般情况下，把类的简要注释和细节注释，以及成员函数的
+简要描述，放在头文件中。成员函数的细节注释，放在
+成员函数的实现出现的地方。这样头文件就显得比较简洁。
+但是利用~WTL~实现的~C++~类的风格却是将类的说明和实现
+合在一起，在同一个文件里实现。因此本书采用的文档风格
+是将简要描述和细节描述都写在一个注释块中。尽管这样
+会使得头文件变大，但因为编辑器能收放显示，所以不会
+造成阅读上的麻烦，也使得文档编写能有连贯性。
+
+注释块中的文本可以自由书写，配合相关的命令。出现在文本
+中的单词，如果和文档化类对象相匹配，就会自动生成一个到
+文档化类的链接。这样可以方便生成~see also~这样的条目。
+表~\ref{tab:design:doc_cmd}~列出了常用的有关命令。
+
+\begin{table}[t]
+  \centering
+  \caption{注释命令}\label{tab:design:doc_cmd}
+\begin{tabular}{|l|l|}
+  \hline
+  % after \\: \hline or \cline{col1-col2} \cline{col3-col4} ...
+  \textbf{命令} & \textbf{解释} \\
+  \hline\hline
+  $\backslash$brief & 其后数行是简要描述 \\
+  \hline
+  $\backslash$param & 其后是参数说明，参数名和说明
+以空格分隔，标上~[in]~或~[out] \\
+  \hline
+  $\backslash$return & 其后是返回值说明 \\
+  \hline
+  $\backslash$note & 其后是注意的内容 \\
+  \hline
+  $\backslash$par & 新起一个段落 \\
+  \hline
+  $\backslash$code & 开始示例代码 \\
+  \hline
+  $\backslash$endcode & 结束示例代码 \\
+  \hline
+  $\backslash$verbatim & 开始一个原样排版的段落 \\
+  \hline
+  $\backslash$endverbatim & 结束一个原样排版的段落 \\
+  \hline
+  $\backslash$deprecated & 指示该文档对象已过时 \\
+  \hline
+  $\backslash$sa & 其后跟可查看的其他文档对象 \\
+  \hline
+  $\backslash$image & 其后跟要插入的图片文件名和标题名等 \\
+  \hline
+\end{tabular}
+
+\end{table}
+
+注释风格可以有两种，即单行和多行。单行如下：
+\begin{verbatim}
+//! content
+\end{verbatim}
+可使用一个或多个单行构成注释块。多行风格如下：
+\begin{verbatim}
+/*!
+content
+*/
+\end{verbatim}
+
+对于成员，也可在原型定义后进行注释，采用如下风格
+\begin{verbatim}
+//!< content
+\end{verbatim}
+或者
+\begin{verbatim}
+/*!< content */
+\end{verbatim}
+这些块只能用来给成员和函数参数~(parameters)~注释，不能
+用来注释文件、类、联合体~(unions)~、结构体~(structs)~、
+群组~(groups)~、枚举~(enums)~和名字空间。结构化命令在
+这种注释块中将被忽略。
+
+\subsubsection{结构化注释}
+
+在文件中放置一个注释块，并配合表
+~\ref{tab:design:doc_scmd}~所示的结构化命令。
+
+\begin{table}[h]
+  \centering
+  \caption{结构化命令}\label{tab:design:doc_scmd}
+\begin{tabular}{|l|l|}
+  \hline
+  % after \\: \hline or \cline{col1-col2} \cline{col3-col4} ...
+  \textbf{命令} & \textbf{解释} \\
+  \hline\hline
+  $\backslash$class & 其后跟类名 \\
+  \hline
+  $\backslash$struct & 其后跟结构名 \\
+  \hline
+  $\backslash$union & 其后跟联合体名 \\
+  \hline
+  $\backslash$enum & 其后跟枚举名 \\
+  \hline
+  $\backslash$fn & 其后跟函数原型 \\
+  \hline
+  $\backslash$var & 其后跟变量名或重定义名或枚举值 \\
+  \hline
+  $\backslash$def & 其后跟宏定义 \\
+  \hline
+  $\backslash$file & 注释文件，其后跟文件名 \\
+  \hline
+  $\backslash$namespace & 其后跟名字空间 \\
+  \hline
+  $\backslash$package & 其后跟~Java~包名 \\
+  \hline
+  $\backslash$interface & 其后跟~IDL~接口名 \\
+  \hline
+\end{tabular}
+
+\end{table}
+
+使用结构化命令，就可以不用在代码中加特殊注释。甚至
+可以把文档块写在其他文件中。如果使用特殊注释，就
+应该尽量避免使用结构化命令，否则需要将原型写两遍，
+不利于代码维护。
+
+\subsubsection{项目列表~(lists)}
+
+在注释中可以增加列表，使得文档更加美观。可以使用
+以下几种方法：
+\begin{enumerate}
+    \item 使用短横杠``-''(dashes)
+
+在每行的开始处以“-”开头，以下缩进对齐，列表
+每项也以`-'开头，递进层次可使用``-\#''。
+例如：
+\lstsetcpp
+\ttfamily
+\begin{lstlisting}
+/*!
+ *  A list of events:
+ *    - mouse events
+ *         -# mouse move event
+ *         -# mouse click event\n
+ *            More info about the click event.
+ *         -# mouse double click event
+ *    - keyboard events
+ *         -# key down event
+ *         -# key up event
+ *
+ *  More text here.
+ */
+\end{lstlisting}
+\CJKfamily{song}
+这样就会生成一个事件列表，如图
+~\ref{pic:design:list}~所示。
+
+\begin{figure}[ht]
+    \centerline{
+        \includegraphics[width= 4 in]{part-basic/chapter-design/pic/design_doc_list.png}
+%4.5in
+    }
+    \caption{事件列表效果\label{pic:design:list}}
+\end{figure}
+
+\setitemindent{true}
+如果使用~tabs~来缩进，那么要检查~doxygen~配置文件中的
+~TAB\_SIZE~设置是否正确。
+
+使用~``.''~可以结束一个列表，并开始一个新的段落。点号
+必须与需要对应的~``-''~对齐。这可用于并列多个列表组。
+\setitemindent{false}
+
+    \item 使用~HTML~命令
+
+可在文档块中使用~HTML~命令。这样对生成网页更加自然。
+
+    \item 使用~$\backslash$arg~或~@li~命令
+
+可创建简单的非递归的列表。
+\end{enumerate}
+
+\subsubsection{高级注释}
+
+高级注释功能包括：
+\begin{itemize}
+    \item 归组~Grouping
+    \item 添加公式
+    \item 生成~C++~类层次图
+\end{itemize}
+
+具体请查阅相关文档，此处不再赘述。
+
+\subsubsection{例子}
+
+最后给出一个类的文档注释例子。
+
+\clearpage
+
+\ttfamily
+\begin{lstlisting}
+//!  A test class.
+/*!
+  A more elaborate class description.
+*/
+class CTest
+{
+public:
+  //! An enum.
+  /*! More detailed enum description. */
+  enum TEnum {
+        TVal1, /*!< Enum value TVal1. */
+        TVal2, /*!< Enum value TVal2. */
+        TVal3  /*!< Enum value TVal3. */
+    }
+    //! Enum pointer.
+    /*! Details. */
+    *enumPtr,
+    //! Enum variable.
+    /*! Details. */
+    enumVar;
+
+    //! A constructor.
+    /*!
+      A more elaborate description of
+      the constructor.
+    */
+    CTest();
+
+    /*! \brief A destructor.
+
+      A more elaborate description of
+      the destructor.
+    */
+    ~CTest();
+
+    //! \brief A normal member taking
+    //! two arguments and return an integer value.
+    /*!
+       \param a an integer argument.
+       \param s a constant character pointer.
+       \return The test results
+       \sa CTest(), ~CTest(), testMeToo()
+           and publicVar()
+    */
+    int testMe(int a, const char *s);
+
+    //! A pure virtual member.
+    /*!
+      \sa testMe()
+      \param c1 the first argument.
+      \param c2 the second argument.
+    */
+    virtual void testMeToo(char c1, char c2) = 0;
+
+    //! A public variable.
+    /*!
+      Details.
+    */
+    int publicVar;
+
+    //! A function variable.
+    /*!
+      Details.
+    */
+    int (*handler)(int a, int b);
+};
+\end{lstlisting}
+\CJKfamily{song}

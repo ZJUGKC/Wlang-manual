@@ -1,0 +1,171 @@
+﻿%
+% Setup, XIN YUAN, 2020
+%
+
+\chapter{WTL~的安装和使用}
+
+WTL~\index{WTL}是微软的~ATL~\index{ATL}库的一个扩展，
+并未得到微软官方的支持。但是在微软网站上，该库仍然在
+不断地更新。作为一种方便地构造桌面程序的框架库，它
+仍然得到关注。
+
+\section{安装}
+
+先到微软网站上免费下载~WTL~。本书使用~WTL8.0~，在
+~Visual Studio 2005~\index{Visual Studio}
+下使用。
+
+
+将压缩包解压缩，假设解压目录为~WTL80~，将此目录移至
+~Visual Studio 2005~的安装目录下的~VC~目录下，和
+~ATLMFC~处于同一个层次的目录下。然后打开~Visual Studio
+2005~，在~Tools-$>$Options~菜单下找到~Projects and
+solutions~页，其中的~VC++ directories~下的~Include
+files~增加~WTL80/include~所在的路径。
+
+
+下一步是安装~Wizard~。找到~WTL80/AppWiz~，双击
+~setup80.js~文件，此时再打开~Visual Studio 2005~，
+新建一个工程，就可以发现多了一个~WTL~目录夹，其中有
+~ATL/WTL Application Wizard~图标。利用此模板可创建
+~WTL~应用程序。
+
+
+\section{使用}
+
+新创建一个解决方案\index{解决方案}，利用~ATL/WTL~的
+~wizard~\index{wizard}，应用类型选择~Dialog Based~和
+~Modal Dialog~，含义是基于对话框的应用程序，对话框是
+模式对话框。
+
+应用程序的 wizard 为我们产生了一系列的文件，
+重要的文件如表 \ref{tab:setup:files} 所示。
+
+\begin{table}[h]
+  \centering
+  \caption{文件列表}\label{tab:setup:files}
+\begin{tabular}{|l|l|}
+  \hline
+  % after \\: \hline or \cline{col1-col2} \cline{col3-col4} ...
+  \textbf{文件名} &  \textbf{功能} \\
+  \hline\hline
+  stdafx.h &  预编译头文件 \\
+  \hline
+  stdafx.cpp &  预编译实现文件 \\
+  \hline
+  resource.h &  资源的定义文件 \\
+  \hline
+  [~工程名~].rc & 资源文件 \\
+  \hline
+  [~工程名~].vcproj & 工程文件 \\
+  \hline
+  [~工程名~].h & 空文件 \\
+  \hline
+  [~工程名~].cpp & 主文件 \\
+  \hline
+  MainDlg.h & 对话框头文件 \\
+  \hline
+  res/[~工程名~].ico & 像标文件 \\
+  \hline
+\end{tabular}
+
+\end{table}
+
+查看这些源文件的代码，会发现它们具有简单的结构，
+优雅的语法。几乎都使用头文件来实现重要的功能，
+.cpp~文件只有两个，一个是用于生成预编译头，一个
+则是含入口主函数的文件。头文件全部包含在这两个
+~.cpp~文件中。这样的风格类似于~Java~程序，即把
+类的说明和实现放在了一起。因为~Visual Studio 2005~
+的编辑器具有收放函数体的功能，因此编程时不会感到
+文件过于庞大，还是可以接受的。
+
+编译并运行这个工程。可以看到一个对话框的界面，
+类似于使用~MFC~编写的程序。
+
+\begin{description}
+\CJKfamily{zhhei}
+    \item [注意]
+\CJKfamily{zhkai}
+Release~版本链接时可能出现~CRT~库的重复定义错误，这需要在
+工程的属性配置中去掉预定义宏~\_ATL\_MIN\_CRT~，在~Visual
+Studio 2005~下将预定义宏的继承选择框去掉即可。重新编译就
+可以通过。
+
+\CJKfamily{zhhei}
+    \item [注意]
+\CJKfamily{zhkai}
+在编译大型工程时，由于需要实例化的类太多，可能会出现
+编译器的堆不足的错误。此时可根据错误提示，在编译器的
+命令行中增加指令，提高编译器堆的大小的数值，就可通过
+编译。
+
+\CJKfamily{zhhei}
+    \item [注意]
+\CJKfamily{zhkai}
+一般编译出来的程序依赖于~ATL80.DLL~和~MS~的~CRT~库。
+要去除依赖性，打开~Project Properties~对话框，在左边的
+树图中打开~Configuration Properties~分支，点击~General，
+在右边的列表中将~Use of ATL~改成~Static Link to ATL，
+将~Minimize CRT use in ATL~先改成~Yes，按确定按钮，
+将工程编译一遍。然后再打开~Project Properties~对话框，
+将~Minimize CRT use in ATL~再改成~No，按确定按钮，
+再将工程编译一遍。此时再打开~depend~程序查看生成的
+目标程序，就可以发现~ATL80.DLL~及~MS~的~CRT~库的依赖性
+已去除。这种方法下无需再将预定义宏的继承选择框去掉。
+
+\CJKfamily{zhsong}
+\end{description}
+
+ATL/WTL~的~wizard~还有其他一些工程类型，表
+~\ref{tab:setup:project}~列出了它们的解释。
+\begin{table}[h]
+  \centering
+  \caption{工程类型}\label{tab:setup:project}
+\begin{tabular}{|l|l|}
+  \hline
+  % after \\: \hline or \cline{col1-col2} \cline{col3-col4} ...
+  \textbf{类型} & \textbf{说明} \\
+  \hline\hline
+  SDI Application & 单文档应用 \\
+  \hline
+  Multiple Threads SDI
+  & 多线程单文档应用~(~如~IE~浏览器~) \\
+  \hline
+  MDI Application & 多文档应用 \\
+  \hline
+  Tab View Application
+  & Tab~视应用~(~类似~Visual Studio~编辑器~) \\
+  \hline
+  Explorer Application & 资源管理器应用 \\
+  \hline
+  Dialog Based & 对话框应用 \\
+  \hline
+\end{tabular}
+
+\end{table}
+
+工程的可选项如表~\ref{tab:setup:option}~所示。
+\begin{table}[h]
+  \centering
+  \caption{工程可选项}\label{tab:setup:option}
+\begin{tabular}{|l|l|}
+  \hline
+  % after \\: \hline or \cline{col1-col2} \cline{col3-col4} ...
+  \textbf{选项} & \textbf{说明} \\
+  \hline\hline
+  Enable ActiveX Control Hosting
+  & 允许嵌入~ActiveX~控制 \\
+  \hline
+  Create as a COM Server & 创建~COM Server \\
+  \hline
+  Generate .CPP Files & 生成~.CPP~文件 \\
+  \hline
+  Add Common Controls Manifest
+  & 加入通用控制的构造文件 \\
+  \hline
+  Unicode Character Set & 使用~Unicode~字符集 \\
+  \hline
+\end{tabular}
+
+\end{table}

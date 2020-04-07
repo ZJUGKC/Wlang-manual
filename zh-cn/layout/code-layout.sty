@@ -1,0 +1,64 @@
+﻿%
+% layout for coding, XIN YUAN, 2020
+%
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{code-layout}
+    [2020/03/11 v1.0 (X. Yuan)]
+
+%coding
+
+\usepackage{listings}
+
+%\lstdefinelanguage{Lex2}
+%{
+%keywordsprefix=TK_,
+%morekeywords={},
+%alsoletter={_=".+-[]?*^|()0123456789\{\}\\},
+%morecomment=[l];
+%}[keywords, comments]
+
+\lstdefinestyle{cpp-style}{
+backgroundcolor=\color{code-back},
+keywordstyle=\color{blue},
+commentstyle=\color{darkgreen},
+stringstyle=\color{brown},
+directivestyle=\color{blue},
+showstringspaces=false,
+frame=none
+}
+
+%\lstset{language={C++},
+%style=cpp-style
+%}
+
+\lstdefinelanguage{wlang}
+{
+morekeywords={char,wchar,float,double,longdbl,decimal,int,uint,
+              ref, in, out, ret, inout, private, public, protected,
+              typedef, return, delegate, null,
+              struct, enum, for},
+morestring=[b]",
+morestring=[b]',
+morecomment=[s]{/*}{*/},
+morecomment=[l]//
+}[keywords, comments, strings]
+
+\lstdefinestyle{wlang-style}{
+backgroundcolor=\color{code-back},
+keywordstyle=\color{blue},
+commentstyle=\color{green},
+stringstyle=\color{brown},
+frame=none
+}
+
+%\lstset{language={wlang},
+%style=wlang-style
+%}
+
+\newcommand\lstsetcpp{
+\lstset{language={C++}, style=cpp-style}
+}
+\newcommand\lstsetwlang{
+\lstset{language={wlang}, style=wlang-style}
+}

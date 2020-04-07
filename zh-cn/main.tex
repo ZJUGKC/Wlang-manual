@@ -1,0 +1,62 @@
+﻿%
+% Wlang manual, XIN YUAN, 2020
+%
+
+\documentclass[12pt, twoside, openright]{book}
+
+%geometry
+\usepackage{geometry}
+% 16K
+\geometry{papersize={185mm, 260mm}, top=22mm, bottom=23mm, left=27mm, right=20mm}
+
+%chinese layout
+\usepackage{layout/cn-layout}
+
+%coding
+\usepackage{layout/code-layout}
+
+%graphics
+\usepackage{graphicx}
+
+%index
+\usepackage{makeidx}
+\makeindex
+
+%document
+
+\begin{document}
+
+%front
+\pagestyle{premain}
+
+\frontmatter
+
+\setplainpagestyle{0pt}{0pt}{}{}{}{}{}{\thepage}
+
+\input{part-front/title.tex}
+\input{part-front/preface.tex}
+
+\tableofcontents
+
+%main
+\mainmatter
+
+\pagestyle{main}
+
+\input{part-basic/base.tex}
+\input{part-libraries/lib.tex}
+
+%list
+\listoffigures
+\listoftables
+
+%appendix
+\input{part-appendix/appendix.tex}
+
+%back
+\backmatter
+
+\input{part-back/bib.tex}
+\input{part-back/index.tex}
+
+\end{document}

@@ -1,0 +1,556 @@
+﻿%
+% Basic topics, XIN YUAN, 2020
+%
+
+\chapter{ATL~和~WTL~的基本原理}
+
+Windows~操作系统自诞生以来，就出现了为数不少的应用
+程序框架，以方便其编写。最早是~Windows API~编程，
+使用~C~语言，其后~Borland~推出了~OWL~框架，微软也
+提出了~MFC~框架\index{MFC}。很快，~MFC~取代了~OWL~，
+同时用~VB~进行快速开发。Borland~在修改的~Pascal~
+语言的基础上，提出了~Delphi~语言，使用~VCL~，
+风靡一时。随着微软在操作系统中大量使用~COM~技术
+构造系统级程序，Delphi~发展变慢，而网络的迅猛发展，
+使得~ActiveX~之类的网络小程序变得普遍起来，这就
+需要新的编程框架来编写出功能强大且尺寸小的组件。
+ATL~正是为这个目的设计的。它和~MFC~生成的程序的
+臃肿形成了鲜明的对比。而~WTL~是~ATL~的扩展，是
+为了更方便地编写~windows~桌面程序而产生的。尽管
+未得到微软的官方支持，但仍作为一个开源库在微软
+网站上和~sourceforge~社区得到支持和更新。同时期
+也涌现出其他各种框架程序，如微软的~.NET~框架，
+跨平台的~Qt~，~WxWidget~等，后面这些框架基本延续
+~MFC~和~VCL~的编程思路，不象~ATL~利用大量的~C++~
+高级特性，因此它们生成的代码仍然臃肿。而~ATL~和
+~WTL~以简单的结构，优雅的语法，生成短小的可执行
+文件，吸引了相当数量的编程爱好者，为其添砖加瓦。
+
+\section{Windows~编程介绍}
+
+Windows~系统的核心是图形交互~(GUI)~。一般的~windows~
+编程主要包含以下内容：
+\begin{itemize}
+    \item 窗口
+    \item 对话框和属性页
+    \item 通用控制
+    \item 子类化和超类化
+    \item 加速键
+    \item 位图
+    \item 其他资源
+    \item 框架窗口的基本元素
+    \item 鼠标和键盘输入
+    \item 系统级编程如进程线程串口等
+    \item COM~和~ActiveX
+    \item 3D~图形
+\end{itemize}
+
+具体细节可参考任何一本讲~windows~基本编程的书
+\cite{wincxsj:2004}。
+
+\section{ATL~的封装}
+
+ATL~是为了编写轻量级的~COM~组件，包括~ActiveX~控制
+而开发出的基于模板的应用程序框架。ATL~用到的~C++~
+高级特性包括模板、多重继承、虚函数表初始化技巧、
+thunk~技术、type cast~等。其中模板和多重继承是有争议
+的~C++~技术，被认为过于复杂，是编程大忌，在其他的
+~C++~的~windows~框架库中就没有按这个思想去编写。但
+正是这些技术，使得~ATL~生成的可执行文件大大减少，
+几乎没有冗余代码，并且和直接调用~Windows API~一样
+高效。
+
+ATL~为我们提供了大量~windows~底层的薄封装。几乎所有
+需要封装的内容，都已经封装好。不仅如此，它们还通过
+成员函数的形式提供与~API~同名的或者具有更友好名字的
+函数，然后直接调用~API~，在析构方法中，释放已分配的
+系统资源。以下各小节介绍~ATL~典型的封装类和工具类。
+
+\subsection{组件接口}
+
+接口智能指针~CComPtr$<$T$>$~提供了对~COM~接口操作的
+支持。模板参数~T~是接口。主要方法有创建组件的一个接口
+~CoCreateInstance~，直接访问接口方法的操作符~-$>$~，
+释放方法~Release~，析构方法能自动释放接口。
+
+类~CComVariant~封装了变体结构~VARIANT~和相关的操作函数。
+使用该类，可以方便地转换变体数据。
+
+类~CComBSTR~封装了~BSTR~类型的数据，即双字节字符串，在
+~windows~中即~Unicode~字符串。因为接口方法均使用该类型
+描述字符串。该类可以方便地转换~Unicode~字符串和
+~ANSI~字符串。
+
+\subsection{系统级别的类}
+
+类~CHandle~封装了~windows~最基本的底层操作对象，它提供
+了对句柄的基本处理方法。
+
+类~CCritSecLock~封装了线程同步对象，关键段
+~CRITICAL\_SECTION~，因为是在同一个进程内提供加锁解锁
+功能，因此效率较高。
+
+\subsection{全局变量}
+
+ATL~工程一般只有一个全局变量~\_Module~，是~CComModule~
+类型的。该变量管理整个进程模块的基本操作。完成工程的
+过程中，尽量不要增加自己的全局变量，特别是需要依赖
+~\_Module~初始化之后才能构造的全局变量。可以把自己的
+全局变量做成~CComModule~类的派生类的成员变量，\_Module~
+就是该派生类的变量。也可以把自己的全局变量做成一些类的
+静态成员。注意它们的初始化不能有相互依赖性。除非有十足
+的把握去自己定义全局变量，否则应尽量避免使用全局变量。
+
+\subsection{Windowing~封装}
+
+ATL~设计了一个窗口句柄~HWND~的封装类，CWindow~，类似于
+~Handle~的封装类，仅有一个数据成员，即窗口句柄~m\_hWnd~，
+没有虚函数。所以这个类和窗口句柄占用同样大小的空间，
+某种意义上是等价的，因此可以直接作为函数参数传递而不会
+损失效率，因为它只要把一个~HWND~数据复制到栈上即可。
+CWindow~的析构方法并不销毁窗口，也就是说，CWindow~对象
+离开了作用域之后，并不会造成窗口的销毁。
+
+不难看出，CWindow~类没有处理~windows~消息。对于应用程序
+来说，需要自己处理窗口的某些消息。ATL~提供了~CWindowImpl~
+类为用户提供窗口消息的定制处理。
+
+Windows~下~SDK~编程的窗口消息处理，是采用窗口回调函数的
+方法进行的。一般地，每个不同类型的窗口都有一个回调函数
+来处理窗口的消息。使用面向对象的程序设计，更自然的方式
+是每个不同类型的窗口对应一个窗口类，使用类的方法来处理
+窗口消息。这样就引出了一个问题，即如何将窗口句柄和类的
+实例联系起来，从而能在窗口的回调函数中调用类的方法来
+完成消息映射处理。在~MFC~框架中使用的是一个全局的
+哈希映射表，因此，在每次调用窗口回调函数时，都要根据
+传递进来的窗口句柄查找得到对应的窗口类的实例指针，再
+调用它的虚方法来完成消息处理。这样做显然十分耗时。而
+~ATL~使用的则是完全不同的一种方法，称为~thunk~方法。
+下面给出这个方法的简要描述，细节请自己读~ATL~的源代码
+以及文献~\cite{ATLjsnm:2003}~。
+
+ATL~的窗口句柄和类实例映射的实现思想是在调用窗口的
+回调函数时，把函数调用的栈上的第一个参数，即窗口句柄
+~HWND~用该窗口回调函数对应的窗口类的实例指针~pThis~
+来替换，然后再跳转到真正的窗口回调函数的代码去执行。
+这段替换代码就称为~thunk~。它是一小段机器码，可以用
+结构表示如下：
+\ttfamily
+\begin{lstlisting}
+#pragma pack(push,1)
+struct _stdcallthunk
+{
+    DWORD   m_mov;
+    // mov dword ptr [esp+0x4], pThis (esp+0x4 is hWnd)
+    DWORD   m_this;         //
+    BYTE    m_jmp;          // jmp WndProc
+    DWORD   m_relproc;      // relative jmp
+    BOOL Init(DWORD_PTR proc, void* pThis)
+    {
+        m_mov = 0x042444C7;  //C7 44 24 0C
+        m_this = PtrToUlong(pThis);
+        m_jmp = 0xe9;
+        m_relproc = DWORD((INT_PTR)proc
+            - ((INT_PTR)this+sizeof(_stdcallthunk)));
+        // write block from data cache and
+        //  flush from instruction cache
+        FlushInstructionCache(GetCurrentProcess(),
+                        this, sizeof(_stdcallthunk));
+        return TRUE;
+    }
+    //some thunks will dynamically allocate the
+    //memory for the code
+    void* GetCodeAddress()
+    {
+        return this;
+    }
+    void* operator new(size_t)
+    {
+        return __AllocStdCallThunk();
+    }
+    void operator delete(void* pThunk)
+    {
+        __FreeStdCallThunk(pThunk);
+    }
+};
+#pragma pack(pop)
+\end{lstlisting}
+\CJKfamily{song}
+
+这时在窗口类的消息回调函数（设计成静态方法）中，
+第一个参数就是窗口类实例的指针，利用它调用一个
+虚函数，就可以使用类的方法来处理窗口消息了。
+
+类~CWindowImpl$<$T, TBase, TWinTraits$>$~是一个
+模板类，模板参数~T~是最终的派生类，TBase~是基类，
+这里要求是~CWindow~或者是~CWindow~的派生类，如
+那些标准控制类~CButton~等，当然也可以是
+~CWindowImpl~定制的派生类，但这样设计概念就比较
+复杂，可读性差。TWinTraits~是窗口风格类，可以用
+~CWinTraits$<$t\_dwStyle, t\_dwExStyle$>$~
+定制得到。这个模板类的功能就是提供了~thunk~方法，
+建立窗口句柄和类方法之间的映射关系。
+
+CWindowImpl~定义了~thunk~数据结构的成员变量，
+因此，对于每个~CWindowImpl~定制的派生类的实例，
+都有一个自己的~thunk~，即这段机器码。CWindowImpl~
+的~Create~方法是用来创建窗口的，它首先注册一个
+窗口类，把窗口回调过程设置为静态方法
+~StartWindowProc~。注意每个最后的定制类都有
+各自的静态方法，相同的定制类的不同实例才共享
+一个静态方法。然后初始化~thunk~成员数据结构，
+同时填充一个描述窗口信息的成员结构，其中包含有
+类的~this~指针值、当前线程~ID~，并把这个成员结构
+的地址加入到全局变量~\_Module~的一个成员链表中。
+随后调用~CreateWindowEx~这个~API~函数。在此~API~
+函数的执行过程中，将发出~WM\_CREATE~窗口事件，
+直接调用窗口回调函数，执行完成后才返回~API~函数。
+此时正是调用静态方法~StartWindowProc~。在该方法中，
+首先从~\_Module~的成员链表中取得刚才加入的
+和当前线程~ID~相同的要创建的窗口信息结构地址，该
+地址即是该窗口类的窗口信息成员结构地址，而该类的
+内存实例在整个创建窗口的过程中都是存在的，因此是
+有效地址。又因为同一个线程一次只能创建一个窗口，
+所以这个成员结构要么不存在，要么是唯一的。其次用
+成员结构信息数据中的~this~值和类的另外一个静态方法
+~WindowProc~的地址初始化~thunk~成员结构，并把窗口
+回调过程设置为~thunk~成员结构内存实例的首地址，
+最后调用~WindowProc~完成窗口消息的其他处理。
+窗口创建完成后，以后若有该窗口类的窗口事件发生，
+则首先执行~thunk~内存映像的代码，执行结果是用机器码
+中的该窗口类实例的指针~pThis~替换栈上函数参数列表的
+第一个参数，再跳转执行静态方法~WindowProc~。此时，
+对于静态方法~WindowProc~来说，第一个参数已不是~HWND~，
+而是窗口类实例指针~pThis~了。利用此指针可调用虚函数
+~ProcessWindowMessage~，用户可重载此虚函数，就可用
+窗口类的方法来处理窗口消息了。ATL~提供了一系列宏，
+有~BEGIN\_MSG\_MAP~，END\_MSG\_MAP~，MESSAGE\_HANDLER~，
+COMMAND\_HANDLER~，NOTIFY\_HANDLER~等来隐含编写虚函数
+~ProcessWindowMessage~，把具体的窗口消息~ID~映射到类的
+方法上去，用户最后只要实现这些类的方法即可。
+
+上述窗口类窗口的创建和填充~thunk~需要分两步，涉及到
+两个静态方法，是因为创建窗口前，窗口句柄还不存在，
+也无法替换其窗口回调函数地址，而调用~API~创建窗口时
+就要发出窗口事件，调用窗口回调函数，所以就只能用两步
+方法，在第一次调用窗口回调函数~StartWindowProc~时
+正式初始化~thunk~，并将以后的窗口回调函数调用转向到
+第二个静态方法~WindowProc~。
+
+窗口类的子类化方法~SubclassWindow~的实现也是类似的
+过程。不过因为要子类化的窗口句柄已经存在，因此不需要
+上述的两步方法，而是直接用~this~值和~WindowProc~的
+地址来初始化~thunk~，从而转向到用户的类方法。
+
+总的来说，这个技术的实质就是每个窗口类的实例都有
+各自的一段~thunk~机器码，用各自的实例的指针替换类的
+静态方法的调用参数，再利用一个虚函数来调用类的方法
+实现对窗口消息的处理。显然，这个方法比~MFC~的哈希表
+映射查找的效率要高，且最终生成的可执行代码要小得多。
+
+对于对话框类型的窗口，ATL~提供了~CDialogImpl~模板类，
+可以用~Create~方法创建无模式对话框，或者~DoModal~
+方法建立有模式对话框。其中也采用了类似的~thunk~技术
+来把对话框过程映射到对话框类的方法上。具体细节可
+自己查看源代码。
+
+这段机器码在何种虚存页面中执行，取决于窗口类的变量
+是栈上变量还是堆上变量。在函数或者类方法内定义的
+局部变量是栈上变量，使用~new~操作符产生的类变量是
+堆上变量。Windows~平台下已经保证这两类变量所在虚存
+页面都是可执行的。在移植到其他平台时，要注意~thunk~
+所在页面必须是可执行的。在高版本的~ATL~的代码实现中，
+通过自动动态分配具有可执行属性的页面，来容纳每个窗口类
+实例的~thunk~代码数据。
+
+\subsection{Windows~控制}
+
+Windows~已经提供了一批标准控制，如按钮、列表、树视图等。
+它们也是窗口，不过它们的行为已经由~Windows~实现好了。
+ATL~没有对这些标准控制进行封装，不过它提供了对现有控制
+进行功能扩展的方法，即子类化和超类化的方法。
+
+子类化方法是替换现有窗口控制的窗口回调函数，由用户来
+处理某些窗口消息，并根据需要最后调用原来的窗口控制的
+窗口回调函数。因此可以使用~CWindowImpl~模板类来实现
+子类化，父类模板参数~TBase~可用~CWindow~。使用窗口类别
+的定义宏~DECLARE\_WND\_CLASS~或者~DECLARE\_WND\_CLASS\_EX~
+来定义窗口类别。消息处理使用~BEGIN\_MSG\_MAP~系列的宏。
+类设计完成后，调用类的~SubclassWindow~方法来替换窗口控制
+的回调过程。
+
+超类化方法也是替换现有窗口控制的窗口回调函数，由用户
+来处理某些窗口消息，并根据需要最后调用原来的窗口控制
+的窗口回调函数。不过，超类化需要明确提供一个窗口类别
+的名字，要获取已有窗口控制的类别的信息，稍加修改再
+创建新窗口类别。使用该窗口类时，不再调用
+~SubclassWindow~方法，而是用~Create~方法直接创建
+窗口控制。这样做的意义在于创建了新的扩展功能的窗口
+类别，可供应用程序的其他部分直接利用此窗口类别来创建
+窗口，便于协作编程。同样可使用~CWindowImpl~模板类来
+实现超类化，父类模板参数~TBase~可用现有控制的包装类，
+它们应是~CWindow~的派生类。使用窗口类别的定义宏
+~DECLARE\_WND\_SUPERCLASS~来定义窗口类别，给出
+窗口控制原来的类别名和新的类别名。消息处理使用
+~BEGIN\_MSG\_MAP~系列的宏。类设计完成后，调用类的
+~Create~方法来创建扩展功能的窗口控制。
+
+显然，可以编写一个窗口类，既可作为子类化使用，也可作为
+超类化使用。使用~CWindowImpl~模板类，用宏
+~DECLARE\_WND\_SUPERCLASS~定义超类，同时重载
+~SubclassWindow~和~UnsubclassWindow~方法，实现
+窗口消息~WM\_CREATE~和~WM\_DESTROY~的处理。然后加上
+用户自己的代码，就可实现窗口控制的扩展功能。
+
+另一种子类化和超类化的方法是使用~CContainedWindow~类，
+它可以将窗口控制的消息处理转向到父窗口，通过在父窗口
+中处理这些消息达到扩展窗口控制的功能的目的。
+
+ActiveX~控件是基于~COM~组件架构的窗口控制，可以被其他
+语言开发的应用程序如~Visual Basic~或者网页~ASP~脚本所
+方便地使用。ATL~原本就是为设计小尺寸的可执行映像的~COM~
+组件而诞生的，所以为设计~ActiveX~控件已经提供了大量的
+模板类的支持。有关编程技术可参考~ATL~的文献。
+
+ActiveX~控件分为有内部窗口和无内部窗口两种。无窗口的
+控件将使用存放该控件的容器的窗口来绘图。为了能在桌面
+程序或者其他~ActiveX~控件中使用~ActiveX~控件，需要
+一个容器类，能放置一个或多个~ActiveX~控件，而这个容器
+类同时也是窗口类。这个技术称为~ActiveX Hosting~技术。
+ATL~提供了~CAxWindow~和~CAxDialogImpl~类来帮助实现能
+容纳~ActiveX~控制的窗口类。
+
+\subsection{窗口的反射机制}
+
+窗口可以想象成桌面上的纸片，它们可以相互重叠嵌套形成
+层次结构。显然，窗口之间如何传递信息，是一个主要的
+编程问题。一般地，Windows~提供了~PostMessage~和
+~SendMessage~两个~API~函数以向其他窗口发送消息进行
+通讯。而在窗口编程中，窗口间最重要的关系是父子关系。
+一般地，窗口控制通过向父窗口发送~WM\_COMMAND~和
+~WM\_NOTIFY~消息来通知父窗口，子窗口控制发生的事件，
+由父窗口根据用户需要定制处理。一般调用~SendMessage~
+来通知父窗口，因此是直接调用了父窗口的窗口函数，要等
+用户处理完这条通知消息之后，子窗口控制继续执行其他的
+处理。
+
+子窗口控制的通知消息处理一般放在父窗口中。但如果消息
+处理和子窗口本身紧密相关，这样编写程序就不是很方便。
+ATL~引入了反射的概念来让子窗口控制类处理通知消息。其
+原理是父窗口使用一个消息宏~REFLECT\_NOTIFICATIONS~，
+处理~WM\_COMMAND~和~WM\_NOTIFY~消息，取出消息参数中
+的窗口句柄，即为发出通知消息的子窗口控制的句柄。然后
+将消息号整数值加上一个常数，再向子窗口控制发回该消息。
+此时~WM\_COMMAND~和~WM\_NOTIFY~消息变成了~OCM\_COMMAND~
+和~OCM\_NOTIFY~消息。程序员可以在子窗口控制类中处理
+这两条消息。这就是消息反射的过程。
+
+用户可以在子窗口控制类中使用~REFLECTED\_~开头的
+消息映射宏来处理子窗口控制经父窗口反射回来的通知消息。
+从而可以在子窗口控制类中方便地扩展控件功能。
+
+\subsection{Mix-in class~的设计模式}
+
+ATL~提出了一种新的程序设计模式，即混合类~Mix-in class~
+模式。该模式使用了~C++~的两个高级特性：模板类和多重继承。
+这两个特性也是~C++~中受到争议的特性。一般认为，使用不同
+的模板参数实例化模板类时，每次都生成了新的类，使得程序
+最终将生成庞大的类库，从而加重了编译器的负担。而多重继承
+使得派生类将拥有不止一个的父类，对于父类中存在的同名方法，
+就无法区分是调用哪一个方法。父类中若含有虚函数，则情况
+更为复杂，除了要区分是哪一个父类的方法外，还跟继承路径
+有关，这就是典型的菱形继承问题。正因为如此复杂，所以目前
+相当多的通用~C++~类库，包括商业用途的类库，都选择了单根
+的继承结构，即所有的类都只有一个父类，且都从同一个基本类
+派生而来。这样做虽然在编程的概念上得到了简化，但是在生成
+可执行映像时链接进了大量不必要的代码，所以可执行文件显得
+十分庞大，在网络环境中需要传输程序到客户浏览器的场合下，
+这样的编程方式就显得不够灵活。
+
+ATL~通过使用模板类和多重继承，做到了真正的代码复用。同时
+因为模板类在编译过程中，只有用到的方法才会被实例化，这样
+最终的可执行文件不再包含无用的代码，因此程序的大小得到
+大幅度的减少，达到令人吃惊的地步。典型的~COM~组件文件只需
+~30K~左右的磁盘空间。这样大大利于网络上~ActiveX~小程序的
+快速传输。
+
+下面给出。。。
+
+。。。
+通过多重继承引入模板类的功能
+。。
+
+
+
+\subsection{编程风格}
+
+inline 的问题 \_\_forceinline noinline
+
+\ttfamily
+\begin{lstlisting}
+__declspec( noinline )
+
+#ifdef _ATL_DISABLE_NO_VTABLE
+#define ATL_NO_VTABLE
+#else
+#define ATL_NO_VTABLE __declspec(novtable)
+#endif
+
+#ifdef _ATL_DISABLE_FORCEINLINE
+#define ATL_FORCEINLINE
+#else
+#define ATL_FORCEINLINE __forceinline
+#endif
+
+#ifdef _ATL_DISABLE_NOINLINE
+#define ATL_NOINLINE
+#else
+#define ATL_NOINLINE __declspec( noinline )
+#endif
+
+ATL_NOINLINE inline
+ATL_NOINLINE
+
+#ifdef _ATL_DISABLE_DEPRECATED
+#define ATL_DEPRECATED(_Message)
+#else
+#define ATL_DEPRECATED(_Message) __declspec( deprecated(_Message) )
+#endif
+\end{lstlisting}
+
+多重继承规则 不使用虚拟继承
+static\_cast<T*>(this)
+
+ 写单个头文件
+
+类的交叉引用
+
+初始化静态变量
+
+ATL\_NO\_VTABLE
+
+用到才实例化
+
+其他工具类
+内存Allocator IAtlMemMgr C...
+智能指针 CAutoPtr CAutoVectorPtr CAutoStackPtr
+CImage GDI+
+CAtlFile CAtlTemporaryFile CAtlFileMaping
+AtlPath Path 函数
+数据结构 集合类 CAtlArray CAtlList CAtlMap(HashTable) 可能会抛出异常
+CSimpleArray CSimpleMap
+CRBTree
+
+
+ATL Server 服务程序 http web service XML web service
+socket for SOAP SMTP HTTP
+
+thread: AtlCreateThread COM线程模型
+CThreadPool CWorkerThread IO完成端口模型
+atlsync 提供了同步对象
+
+CString类
+CRect等类
+
+ANSI UNICODE BSTR OLESTR转换宏。
+C开头的宏实际是类，且它的构造函数会抛出任何异常，
+因此使用类变量，并捕获异常。或者在参数调用中使用构造函数，
+产生临时对象，调用后自动释放的办法。另有一套使用
+USES\_CONVERSION A2T等在栈上分配内存的字符串转换宏，在函数
+退出时自动释放栈上空间。
+
+\section{WTL~的封装}
+
+在~ATL~封装的基础上，WTL~进一步对窗口、控制和~GDI~进行
+了封装。除此以外，还封装了一些有用的工具类。封装的基本
+特征如下：
+\begin{itemize}
+    \item 几乎全部~C++~特性
+    \item 对~windows~通用控制进行了薄封装
+    \item 一个小巧但强大的应用程序框架，并取消了
+文档~/~视架构
+    \item 打印和打印预览的支持
+    \item 移植~MFC~的类~CPoint~，CRect~，CSize~，
+CString~等。
+    \item 提供了消息破解宏
+\end{itemize}
+
+其中有些封装如~CString~和~ATL~产生了重复，可以根据不同
+的需要去使用，需在类名前加上名字空间说明，如~WTL::CString~
+或者~ATL::CString~。
+
+表~\ref{tab:basic:files}~给出了~WTL~提供的头文件的功能
+说明。
+
+\begin{table}[h]
+  \centering
+  \caption{文件说明}\label{tab:basic:files}
+\begin{tabular}{|l|l|}
+  \hline
+  % after \\: \hline or \cline{col1-col2} \cline{col3-col4} ...
+  \textbf{文件名} & \textbf{功能} \\
+  \hline\hline
+  atlapp.h & 消息循环接口及应用模块类 \\
+  \hline
+  atlcrack.h & 消息破解宏 \\
+  \hline
+  atlctrls.h & 标准控制和通用控制的类 \\
+  \hline
+  atlctrlw.h & Command Bar~类 \\
+  \hline
+  atlctrlx.h & 位图按钮、带检查框的~ListView~，和其他控制 \\
+  \hline
+  atlddx.h & 对话框和窗口中的控制和变量间的数据交换 \\
+  \hline
+  atldlgs.h & 通用对话框类，属性页类 \\
+  \hline
+  atlfind.h & 查找/替换通用对话框类 \\
+  \hline
+  atlframe.h & 框架窗口类，多文档，UI~更新类 \\
+  \hline
+  atlgdi.h & DC~类，GDI~类 \\
+  \hline
+  atlmisc.h & CPoint, CRect, CSize, CString~等类 \\
+  \hline
+  atlprint.h & 打印和打印预览 \\
+  \hline
+  atlres.h & 标准资源~ID \\
+  \hline
+  atlresce.h & Windows CE~下的标准资源~ID \\
+  \hline
+  atlscrl.h & 窗口滚动的支持 \\
+  \hline
+  atlsplit.h & 切分窗口 \\
+  \hline
+  atltheme.h & 窗口方案和动画 \\
+  \hline
+  atluser.h & 菜单类、像标类、资源类 \\
+  \hline
+  atlwince.h & Windows CE~下的窗口支持类 \\
+  \hline
+  atlwinx.h & 窗口增强类 \\
+  \hline
+\end{tabular}
+
+\end{table}
+
+GDI~类
+
+
+　　template <class TBase>
+
+　　class CButtonT : public TBase
+　　typedef CButtonT<ATL::CWindow>   CButton;
+
+说到现在，如果我要使用呢？MFC有一系列的类，可以让我们
+很容易地使用Windows的标准控件，而SDK下面，很多时候不得不使用直接对控件
+的窗口句柄发送消息的做法，如果你用SDK写过带有ListView Control的程序，
+估计你会对一大堆的LVM\_xxxx深恶痛绝，当然，你可以用WindowsX.h当中定义的
+一些可爱的宏，但是看起来总是有点让人感到不是那么爽。幸运的是，WTL已经像
+MFC那样，把所有的Windows标准控件进行了封装，并且提供了更加友好的接口函数
+来对控件进行操作。还是随便从头文件当中摘抄一些出来吧：
+
+WTL~提供了对~Windows~的薄封装，在编写时仍按~Win32 SDK~的
+方式进行程序设计，使用的结构、常数仍然是~Win32~中的结构
+和常数，因此其效率和直接使用~SDK~相近，而在编程的思路上
+更接近人的抽象思维，相对较自然。

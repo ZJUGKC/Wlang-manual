@@ -1,0 +1,317 @@
+﻿%
+% layout for Chinese, XIN YUAN, 2020
+%
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{cn-layout}
+    [2020/03/09 v1.0 (X. Yuan)]
+
+%xeCJK
+
+\usepackage[BoldFont,SlantFont,CJKchecksingle]{xeCJK}
+\setCJKmainfont[BoldFont=SimHei,SlantedFont=KaiTi]{SimSun}
+\setCJKsansfont[BoldFont=SimHei,SlantedFont=KaiTi]{SimSun}
+\setCJKmonofont[ItalicFont=FangSong]{SimSun}
+\setCJKfamilyfont{zhsong}{SimSun}
+\setCJKfamilyfont{zhhei}{SimHei}
+\setCJKfamilyfont{zhkai}{KaiTi}
+\setCJKfamilyfont{zhfs}{FangSong}
+\setCJKfamilyfont{zhls}{LiSu}
+\setCJKfamilyfont{zhyy}{YouYuan}
+
+\usepackage{CJKnumb}
+
+%general
+
+\usepackage[CJKbookmarks]{hyperref}
+\usepackage{ifthen}
+\usepackage{fancyvrb}
+
+\newcommand{\setitemindent}[1]{
+\ifthenelse{\equal{#1}{true}}
+{\setlength{\parindent}{2em}}
+{\setlength{\parindent}{0pt}}
+}
+
+\parindent 2em
+
+%title
+
+\usepackage[bf, small, center, indentafter, pagestyles]{titlesec}
+
+\def\CJKprechaptername{第}
+\def\CJKthechapter{\CJKnumber{\thechapter}}
+\def\CJKchaptername{章}
+
+%\makeatletter
+%\renewcommand\CJKthechapter{~\@arabic\c@chapter~}
+%\makeatother
+\renewcommand{\chaptername}{\CJKprechaptername\CJKthechapter\CJKchaptername}
+%\renewcommand{\chaptername}{第\CJKnumber{\thechapter}章}
+%\renewcommand{\chaptername}{第~\thechapter~章}
+
+\titleformat{\chapter}[hang]
+{\normalfont\Huge\filcenter\bf}
+{\chaptername}
+{1em}{}
+%\titleformat{\chapter}[hang]{\centering\LARGE\bfseries}{\chaptername}{1em}{}
+
+\titlespacing{\chapter}{0pt}{*0}{*4}
+%\titlelabel{\S\thetitle\quad}
+
+\titleformat{\section}[hang]
+{\normalfont\LARGE\filright\bf}
+{\S\hspace{1pt}\arabic{chapter}.\arabic{section}}
+{1em}{}
+%\titleformat{\section}[hang]{\Large\bfseries}{\thesection}{1em}{}
+
+\titleformat{\subsection}[hang]
+{\normalfont\Large\filright\bf}
+{\S\hspace{1pt}\arabic{chapter}.\arabic{section}.\arabic{subsection}}
+{1em}{}
+%\titleformat{\subsection}[hang]{\large\bfseries}{\thesubsection}{1em}{}
+
+\titleformat{\subsubsection}[hang]
+{\normalfont\large\filright\bf}
+{\S\hspace{1pt}\arabic{chapter}.\arabic{section}.\arabic{subsection}
+              .\arabic{subsubsection}}
+{1em}{}
+%\titleformat{\subsubsection}[hang]{\normalsize\bfseries}{\thesubsubsection}{1em}{}
+
+%\renewcommand{\partname}{第\CJKnumber{\@arabic\c@part}部分}
+%\titleformat{\part}[display]{\centering\Huge\bfseries\selectfont \CJKfamily{zhkai}}{\partname}{1em}{}
+%\titlespacing{\part}{0pt}{*40}{*1}
+
+\renewcommand{\contentsname}{目录}
+\renewcommand{\listfigurename}{插图列表}
+\renewcommand{\listtablename}{表格列表}
+%%\renewcommand{\abstractname}{摘要}
+%%\renewcommand{\prefacename}{导言}
+%%\renewcommand{\refname}{参考文献}
+\renewcommand{\bibname}{参考文献}
+\renewcommand{\indexname}{索引}
+\renewcommand{\figurename}{图}
+\renewcommand{\tablename}{表}
+%\renewcommand{\notesname}{注}
+%\renewcommand{\today}{\number\year年\number\month月\number\day日}
+
+\usepackage{titletoc}
+
+\titlecontents{part}[0em]{\Large\bf\selectfont \CJKfamily{zhkai}\addvspace{4ex}}
+{~}{}
+{\titlerule*[0.5pc]{~}\contentspage}[\addvspace{0.5ex}]
+
+\titlecontents{chapter}[0em]{\large\bf\addvspace{4ex}}
+{\contentspush{第\,\CJKnumber{\thecontentslabel}\,章\hspace*{0.7em}}}{}
+%{\contentslabel{4em}}{}
+{\titlerule*[0.5pc]{.}\contentspage}[\addvspace{0.5ex}]
+
+%\titlecontents{section}
+%[2em]
+%{\normalsize}
+%{\thecontentslabel\hspace*{1em}}
+%{\hspace*{-2.3em}}
+%{\titlerule*[0.8pc]{.}\contentspage}
+\titlecontents{section}
+[2em]
+{\normalsize}
+{\S\hspace{1pt}\thecontentslabel\hspace*{1em}}
+{\hspace*{-2.3em}}
+{\titlerule*[0.8pc]{.}\contentspage}
+
+%\titlecontents{subsection}
+%[7em]
+%{\normalsize}
+%{\contentslabel{3em}}
+%{\hspace*{-2.3em}}
+%{\titlerule*[0.8pc]{.}\contentspage}
+\titlecontents{subsection}
+[5em]
+{\normalsize}
+{\S\hspace{1pt}\thecontentslabel\hspace*{1em}}
+{\hspace*{-2.3em}}
+{\titlerule*[0.8pc]{.}\contentspage}
+
+%\titlecontents{subsubsection}
+%[10em]
+%{\normalsize}
+%{\contentslabel{4em}}
+%{\hspace*{-2.3em}}
+%{\titlerule*[0.8pc]{.}\contentspage}
+\titlecontents{subsubsection}
+[8em]
+{\normalsize}
+{\S\hspace{1pt}\thecontentslabel\hspace*{1em}}
+{\hspace*{-2.3em}}
+{\titlerule*[0.8pc]{.}\contentspage}
+
+%color
+
+\usepackage[dvips]{color}
+\definecolor{code-back}{gray}{0.85}
+\definecolor{darkgreen}{rgb}{0, 0.5, 0}
+\definecolor{brown}{rgb}{0.5, 0.25, 0}
+
+%pages
+
+\newcommand{\cnpart}[1]{
+\addtocounter{part}{1}
+\newpage
+\phantomsection
+\addcontentsline{toc}{part}{第\CJKnumber{\arabic{part}}部分\,\,\,#1}
+\thispagestyle{empty}
+\par\vspace*{0.25\paperheight}
+\centerline{\Huge\bfseries \CJKfamily{zhkai} 第\CJKnumber{\arabic{part}}部分}
+\par\vspace*{2.2em}
+\centerline{\Huge\bfseries \CJKfamily{zhkai} #1}
+\newpage
+}
+
+%\newpagestyle{premain}[\large]{
+%\sethead[\textbf{\thepage}]
+%[][\contentsname]
+%{\contentsname}{}{\textbf{\thepage}}
+%\setheadrule{0.4pt}
+%}
+\newpagestyle{premain}[\small\CJKfamily{zhkai}]{
+\sethead[\ifthechapter{\chaptername\quad}{}\chaptertitle][][\thepage] %\qquad
+        {\thepage}{}{\ifthechapter{\chaptername\quad}{}\chaptertitle}
+%\setfoot[][\thepage][]
+%        {}{\thepage}{}\headrule
+\setfoot[\thepage][][]
+        {}{}{\thepage}\headrule
+}
+
+%\newpagestyle{main}[\large]{
+%\sethead [\textbf{\thepage}]
+%[]
+%[\textsl{\chaptername\quad\chaptertitle}]
+%{\textsl{\thesection\quad\sectiontitle}}
+%{}
+%{\textbf{\thepage}}
+%\setheadrule{0.4pt}
+%}
+\newpagestyle{main}[\small\CJKfamily{zhkai}]{
+\sethead[\ifthechapter{\chaptername\quad}{}\chaptertitle][][\thepage]
+        {\thepage}{}{\ifthechapter{\chaptername\quad}{}\chaptertitle}
+%\setfoot[][\thepage][]
+%        {}{\thepage}{}\headrule
+\setfoot[\thepage][][]
+        {}{}{\thepage}\headrule
+}
+%\footrule %the line of foot
+%\setheadrule{<width>}
+%\setfootrule{<width>}
+
+%\renewpagestyle{plain}{
+%\setfoot[][][]{}{\thepage}{}
+%}
+
+%\setplainpagestyle[<is_rule_line>]{<head-rule-width>}{<foot-rule-width>}
+%                  {head-left{head-middle}{head-right}{foot-left}{foot-middle}{foot-right}
+%  the value of first parameter: hr <head-rule> fr <foot-rule> none <no-rule>
+%  width: 0pt or <N>pt
+\newcommand{\setplainpagestyle}[9][none]{
+  \renewpagestyle{plain}{
+  \sethead[][][]
+  {#4}{#5}{#6}
+  \setfoot[][][]
+  {#7}{#8}{#9}
+  \ifthenelse{\equal{#1}{none}}{}
+  {
+    %headrule
+    \ifthenelse{\equal{#1}{hr}}
+      {
+        \ifthenelse{\equal{#2}{0pt}}{\headrule}{\setheadrule{#2}}
+      }{}
+    %footrule
+    \ifthenelse{\equal{#1}{fr}}
+      {
+        \ifthenelse{\equal{#3}{0pt}}{\footrule}{\setfootrule{#3}}
+      }{}
+  }
+  }
+}
+
+% \setnextpagestyle[<is_rule_line>]{<name>}{<head-rule-width>}{<foot-rule-width>}
+%                  {<font-and-format>}{<head-foot-commands>}
+\newcommand{\setnextpagestyle}[6][none]{
+  \newpagestyle{#2}[#5]{
+  #6
+  \ifthenelse{\equal{#1}{none}}{}
+  {
+    %headrule
+    \ifthenelse{\equal{#1}{hr}}
+      {
+        \ifthenelse{\equal{#3}{0pt}}{\headrule}{\setheadrule{#3}}
+      }{}
+    %footrule
+    \ifthenelse{\equal{#1}{fr}}
+      {
+        \ifthenelse{\equal{#4}{0pt}}{\footrule}{\setfootrule{#4}}
+      }{}
+  }
+  }
+  \pagestyle{#2}
+}
+
+\makeatletter
+\renewcommand\cleardoublepage{\clearpage\if@twoside \ifodd\c@page\else
+\hbox{}\thispagestyle{empty}\newpage\if@twocolumn\hbox{}\newpage\fi\fi\fi}
+\makeatother
+
+%special pages
+
+% \addspecialpagecontentsline[chapter-type]{text}
+%   chapter-type: default value is chapter, others are chapter-names.
+\newcommand{\addspecialpagecontentsline}[2][chapter]{
+  \cleardoublepage
+  \phantomsection
+  \addcontentsline{toc}{#1}{#2}
+}
+
+\renewcommand{\appendixname}{附录\,\@Alph\c@chapter}
+
+\newcommand{\setappendixchapterformat}[1]{
+\def\CJKprechaptername{附录}%
+\def\CJKthechapter{#1{chapter}}%
+\def\CJKchaptername{\relax}%
+}
+
+%\setappendixsectionformat{<display-format>}
+%display-format：\arabic \Roman \roman \alph \Alph \fnsymbol
+\newcommand{\setappendixsectionformat}[1]{
+  \titleformat{\section}[hang]
+  {\normalfont\LARGE\filright\bf}
+  {\S\hspace{1pt}#1{chapter}.\arabic{section}}
+  {1em}{}
+}
+%\setappendixsubsectionformat{<display-format>}
+\newcommand{\setappendixsubsectionformat}[1]{
+  \titleformat{\subsection}[hang]
+  {\normalfont\Large\filright\bf}
+  {\S\hspace{1pt}#1{chapter}.\arabic{section}.\arabic{subsection}}
+  {1em}{}
+}
+%\setappendixsubsubsectionformat{<display-format>}
+\newcommand{\setappendixsubsubsectionformat}[1]{
+  \titleformat{\subsubsection}[hang]
+  {\normalfont\large\filright\bf}
+  {\S\hspace{1pt}#1{chapter}.\arabic{section}.\arabic{subsection}
+                .\arabic{subsubsection}}
+  {1em}{}
+}
+
+\newcommand{\setappendixchaptertoc}{
+\titlecontents{chapter}[0em]{\large\bf\addvspace{4ex}}
+{\contentslabel{4em}}{}
+{\titlerule*[0.5pc]{.}\contentspage}[\addvspace{0.5ex}]
+}
+
+\newcommand{\cnappendixchapter}[1]{
+\addtocounter{chapter}{1}
+\setcounter{section}{0}
+\chapter*{附录\,\Alph{chapter}\,\,\,#1}
+\phantomsection
+\addcontentsline{toc}{chapter}{附录\,\Alph{chapter}\,\,\,#1}
+}

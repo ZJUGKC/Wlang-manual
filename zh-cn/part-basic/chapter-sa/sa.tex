@@ -1,0 +1,63 @@
+﻿%
+% Shared Assembly, XIN YUAN, 2020
+%
+
+\chapter{共享装配件}\label{base:sa}
+
+DLL~是
+
+\section{可执行格式}
+
+\section{~COFF~格式}
+
+\section{~PE~格式}
+
+\section{~EXT~格式}
+
+ELF
+
+\section{基础}
+
+导出类 导出函数 全局变量
+
+导入
+
+共享内存 共享变量
+
+CRT库 自定义入口
+
+\_\_DllMainCRTStartup
+DllMain
+
+函数调用约定 \_\_stdcall \_cdecl
+
+\section{WIN32~的~DLL}
+
+DEF文件 右键 Add New Item Module-Definition File
+Linker-> Input-> Module Definition File
+
+\section{ATL~的~DLL}
+
+COM
+
+WIN32 using ATL
+Export symbols
+
+\section{WTL~的~DLL}
+
+和前面
+使用
+ATL
+一样
+
+为了兼容 为了产生的
+尽量仅导出函数
+
+若仅用VC 导出类
+
+CRT库的匹配问题
+VS2005 仅多线程库
+VC6 单线程 多线程
+Debug Release
+
+EXE也是如此

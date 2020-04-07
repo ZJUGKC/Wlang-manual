@@ -1,0 +1,535 @@
+﻿%
+% Basic Data Types, XIN YUAN, 2020
+%
+
+数据类型分为值类型和引用类型两种。
+
+\subsection{值类型}
+
+变量是存储信息的基本单元；是计算机内存中的一个存储空间。
+
+值类型分为几下几种：
+
+\begin{itemize}
+\item{简单类型}
+\item{结构类型}
+\item{枚举类型}
+\item{联合体和位段类型}
+\end{itemize}
+
+简单类型即纯量类型，是直接由一系列元素构成的类型。包括整数、
+布尔、字符、实数四种。
+
+\subsubsection{整型}
+
+计算机上的整数是有范围的。表~\ref{tab_int}~ 就是整数类型的表示。
+
+\begin{table}[h]
+  \centering
+  \caption{整数类型}\label{tab_int}
+  \vspace{1.5ex}
+\begin{tabular}{|l|l|l|}
+  \hline
+  % after \\: \hline or \cline{col1-col2} \cline{col3-col4} ...
+  \textbf{数据类型} & \textbf{特征} & \textbf{取值范围} \\
+  \hline\hline
+  char & 有符号~8~位整数 & -128～127 \\
+  \hline
+  uchar & 无符号~8~位整数 & 0～255 \\
+  \hline
+  short & 有符号~16~位整数 & -32768～32767 \\
+  \hline
+  ushort & 无符号~16~位整数 & 0～65535 \\
+  \hline
+  long & 有符号~32~位整数 & -2147483648～2147483647 \\
+  \hline
+  ulong & 无符号~32~位整数 & 0～4294967295 \\
+  \hline
+   &  & -9223372036854775808 \\
+  \raisebox{1.3ex}[0pt]{int64} & \raisebox{1.3ex}[0pt]{有符号~64~位整数}
+  & ～9223372036854775807 \\
+  \hline
+  uint64 & 无符号~64~位整数 & 0～18446744073709551615 \\
+  \hline
+  int128 & 有符号~128~位整数 & $-2^{63}$～$2^{63}-1$ \\
+  \hline
+  uint128 & 无符号~128~位整数 & $0$～$2^{64}-1$ \\
+  \hline
+\end{tabular}
+
+\end{table}
+
+此外定义两个关键字：~int~和~uint~，用来表示机器字长的整数。不同
+的机器通用寄存器的字长不同，利用这两个类型的变量可以表示不同目标
+机器上的通用寄存器整数，从而实现跨硬件平台。
+
+整数的内存表示只需要注意不同硬件上的大端和小端问题。
+
+以上整数的正则表达式为：
+
+\newcommand{\clrsmall}[1]{\textcolor{magenta}{#1}}
+\newcommand{\clrbig}[1]{\textcolor{blue}{#1}}
+
+\begin{Verbatim}[frame=single, commandchars=*()]
+    *clrsmall(digit)     [0-9]
+    *clrsmall(hex_digit) [0-9a-fA-F]
+    *clrbig(TK_PINUM)   {digit}+
+    *clrbig(TK_PHEXNUM) 0[xX]{hex_digit}+
+    *clrbig(TK_KEY_CHAR)     "char"
+    *clrbig(TK_KEY_UCHAR)    "uchar"
+    *clrbig(TK_KEY_SHORT)    "short"
+    *clrbig(TK_KEY_USHORT)   "ushort"
+    *clrbig(TK_KEY_LONG)     "long"
+    *clrbig(TK_KEY_ULONG)    "ulong"
+    *clrbig(TK_KEY_INT64)    "int64"
+    *clrbig(TK_KEY_UINT64)   "uint64"
+    *clrbig(TK_KEY_INT128)   "int128"
+    *clrbig(TK_KEY_UINT128)  "uint128"
+    *clrbig(TK_KEY_INT)      "int"
+    *clrbig(TK_KEY_UINT)     "uint"
+\end{Verbatim}
+
+\subsubsection{布尔型}
+
+布尔型是用来表示“真”和“假”的概念的。采用关键字~true~和~false~来
+表示。和~C~与~C++~不同，~true~不能用其他非零值代替。整数类型不能
+转换为布尔型。用关键字~bool~表示该数据类型。实现的方式是针对同一
+个作用域，将所有~bool~变量集中到一个或多个~int~变量，每个~bool~变
+量占用一个位。
+
+正则表达式：
+
+\begin{Verbatim}[frame=single, commandchars=\\\{\}]
+    \textcolor{blue}{TK_KEY_BOOL}   "bool"
+    \textcolor{blue}{TK_KEY_TRUE}   "true"
+    \textcolor{blue}{TK_KEY_FALSE}  "false"
+\end{Verbatim}
+
+\subsubsection{字符型}
+
+字符分为~char~和~wchar~两种，分别表示~ANSI~字符和~UNICODE~字符。
+其中~wchar~的位数根据系统的不同而不同。~Windows~下是~16~位的，某些
+~X~系统下是~32~位的。它们需要显式转换为其他类型。
+
+如下代码对字符赋值：
+
+\lstsetwlang
+
+\ttfamily
+\begin{lstlisting}
+    char c = 'A';
+    wchar c = L'A';
+    char c = '\x05';
+    wchar c = L'\x05';
+    wchar c = '\x0032';
+\end{lstlisting}
+\CJKfamily{song}
+
+其中前缀~L~表示其后字符为~UNICODE~字符；~$\backslash$x~后跟一个~16~
+进制数表示字符。
+
+转义符~``$\backslash$''~用来表示特殊的控制字符，如表~\ref{tab_esc}~
+所示：
+
+\begin{table}[h]
+  \centering
+  \caption{转义符}\label{tab_esc}
+  \vspace{1.5ex}
+\begin{tabular}{|l|l|}
+  \hline
+  % after \\: \hline or \cline{col1-col2} \cline{col3-col4} ...
+  \textbf{转义符} & \textbf{含义} \\
+  \hline\hline
+  $\backslash$' & 单引号 \\
+  \hline
+  $\backslash$'' & 双引号 \\
+  \hline
+  $\backslash\backslash$ & 反斜杠 \\
+  \hline
+  $\backslash$0 & 空字符 \\
+  \hline
+  $\backslash$a & 感叹号 \\
+  \hline
+  $\backslash$b & 退格 \\
+  \hline
+  $\backslash$f & 换页 \\
+  \hline
+  $\backslash$n & 新行 \\
+  \hline
+  $\backslash$r & 回车 \\
+  \hline
+  $\backslash$t & 水平~tab~ \\
+  \hline
+  $\backslash$v & 垂直~tab~ \\
+  \hline
+  $\backslash$x & 后面的数字是~16~进制数 \\
+  \hline
+\end{tabular}
+
+\end{table}
+
+正则表达式：
+
+\begin{Verbatim}[frame=single, commandchars=*\#\~]
+    *clrsmall#ansi_char~      ([^'\"\n]|\\(['\"\\0abfnrtv]|
+                             x{hex_digit}{hex_digit}))
+    *clrsmall#wide_char~      (\\x{hex_digit}{hex_digit}
+                              {hex_digit}+
+                             |[x80-xff][x00-xff])
+    *clrbig#TK_KEY_WCHAR~   "wchar"
+    *clrbig#TK_CONST_CHAR~  '{ansi_char}'
+    *clrbig#TK_CONST_WCHAR~ ((L'{ansi_char})|('{wide_char}))'
+\end{Verbatim}
+
+\subsubsection{实型}
+
+实数类型包括浮点和十进制数两种类型。
+
+\textbf{浮点类型}
+
+浮点包括单精度~(float)~，双精度~(double)~和长精度~(longdbl)~三种
+类型。计算机对浮点数的运算速度大大低于对整数的运算速度。
+
+\begin{itemize}
+\item{单精度}
+
+占~32~位，取值范围：~$\pm 1.5\times 10^{-45}$~到
+~$\pm 3.4\times 10^{38}$~，小数精度~7~位数。
+
+内存格式：待补充。。。。。。
+无效数的表示：
+
+\item{双精度}
+
+占~64~位，取值范围：~$\pm 5.0\times 10^{-324}$~到
+~$\pm 1.7\times 10^{308}$~，小数精度~15~到~16~位数。
+
+内存格式：待补充。。。。。。
+无效数的表示：
+
+\item{长精度}
+
+占用~80~位，
+
+内存格式：待补充。。。。。。
+无效数的表示：
+
+\end{itemize}
+
+\textbf{十进制类型}
+
+十进制数~(decimal)~主要用来表示金融和货币的数字计算。它是高精度、
+~128~位的数字类型，表示范围为~$\pm 1.0\times 10^{-28}$~到
+~$\pm 7.9\times 10^{-28}$~，有效数字~28~至~29~位。运算结果准确到
+~28~个小数位。
+
+十进制类型的计算机内存格式：待补充。。。。。。
+无效数的表示：
+
+实数常量代码表示：
+
+\ttfamily
+\begin{lstlisting}
+    float a = 1.0f;
+    double a = 1.0;
+    longdbl a = 1.0ld;
+    decimal a = 1.0m;
+\end{lstlisting}
+\CJKfamily{song}
+
+其中后缀~f~表示单精度浮点数，~ld~表示双精度浮点，~m~表示十进制数。
+
+正则表达式：
+
+\begin{Verbatim}[frame=single, commandchars=^\#\~]
+    ^clrsmall#num_exp~      [eE][+-]?{digit}+
+    ^clrsmall#float_num~    ({digit}+"."{digit}*({num_exp})?|
+                       {digit}+{num_exp}|
+                       "."{digit}+({num_exp})?)
+    ^clrbig#TK_KEY_FLOAT~       "float"
+    ^clrbig#TK_KEY_DOUBLE~      "double"
+    ^clrbig#TK_KEY_LONGDBL~     "longdbl"
+    ^clrbig#TK_KEY_DECIMAL~     "decimal"
+    ^clrbig#TK_CONST_PFLOAT~    {TK_PINUM}f|{float_num}f
+    ^clrbig#TK_CONST_PDOUBLE~   {float_num}
+    ^clrbig#TK_CONST_PLONGDBL~  {TK_PINUM}ld|{float_num}ld
+    ^clrbig#TK_CONST_PDECIMAL~  {TK_PINUM}m|{float_num}m
+\end{Verbatim}
+
+\subsubsection{结构类型}
+
+结构将一系列变量组织成一个单一的实体。每个变量称为结构的成员。
+结构用~struct~来声明，如下所示：
+
+\ttfamily
+\begin{lstlisting}
+    struct PhoneBook
+    {
+        int a;
+        int b;
+    }
+    PhoneBook t;
+\end{lstlisting}
+\CJKfamily{song}
+
+~t~就是一个结构类型的变量。结构的成员全部是~public~类型，即可以
+通过变量名加上``~.~''号，再加上成员名称来访问：
+
+\ttfamily
+\begin{lstlisting}
+    t.a = 2;
+\end{lstlisting}
+\CJKfamily{song}
+
+结构的成员类型可以是前面的简单类型，也可以是结构体、联合体、枚举
+或位段。结构体内部可以嵌套定义结构体、联合体、枚举和位段，其作用域
+仅限于结构体内部。
+
+正则表达式：
+
+\begin{Verbatim}[frame=single, commandchars=^\#\~]
+    ^clrsmall#letter~   [a-zA-Z_]
+    ^clrbig#TK_KEY_STRUCT~  "struct"
+    ^clrbig#TK_KEY_PRIVATE~ "private"
+    ^clrbig#TK_KEY_PUBLIC~  "public"
+    ^clrbig#TK_IDENTIFIER~  {letter}({letter}|{digit})*
+    ^clrbig#TK_LCURLY~  "{"
+    ^clrbig#TK_RCURLY~  "}"
+    ^clrbig#TK_COMMA~   ","
+    ^clrbig#TK_SEMI~    ";"
+\end{Verbatim}
+
+\subsubsection{枚举类型}
+
+枚举~(enum)~为一组在逻辑上密不可分的整数值提供便于记忆的符号。可
+如下声明：
+
+\ttfamily
+\begin{lstlisting}
+    enum WeekDay
+    {
+        Sunday, Monday, Tuesday, Wednesday, Thursday,
+        Friday, Saturday
+    }
+    WeekDay day;
+    day = Tuesday;
+\end{lstlisting}
+\CJKfamily{song}
+
+注意：结构是由不同类型的数据组成的一组新的数据类型，结构类型的变量
+的值是由各个成员的值组合而成的。枚举类型的变量在某个时刻只能取枚举
+中某一个元素的值，如上面的~day~，它的值要么是~Sunday~，要么是
+~Monday~或其他的星期元素。但它在一个时刻只能代表具体的某一天，不能
+既是星期二，又是星期三。
+
+默认枚举中每个元素类型都是~int~型，且第一个元素的值为~0~，后面的
+每一个连续的元素的值按加~1~递增。在枚举中，也可以给元素直接赋值，
+如下代码把星期天的值设为~1~，其后元素的值分别为~2~，~3~$\ldots$。
+
+\ttfamily
+\begin{lstlisting}
+    enum WeekDay
+    {
+        Sunday=1, Monday, Tuesday, Wednesday, Thursday,
+        Friday, Saturday
+    }
+\end{lstlisting}
+\CJKfamily{song}
+
+为枚举类型的元素所赋的值的类型限于~long~、~int~、~short~和~byte~等
+整数类型。
+
+正则表达式：
+
+\begin{Verbatim}[frame=single, commandchars=^\#\~]
+    ^clrbig#TK_KEY_ENUM~    "enum"
+    ^clrbig#TK_EQ~          "="
+\end{Verbatim}
+
+语法:
+
+\begin{Verbatim}[frame=single, commandchars=^\#\~]
+    ^clrsmall#enumerator_def~
+     : TK_KEY_ENUM TK_IDENTIFIER
+       TK_LCURLY ^clrsmall#enumerator_list~ TK_RCURLY
+     ;
+    ^clrsmall#enumerator_list~
+     : ^clrsmall#enumerator~
+     | ^clrsmall#enumerator_list~ TK_COMMA ^clrsmall#enumerator~
+     ;
+    ^clrsmall#enumerator~
+     : TK_IDENTIFIER
+     | TK_IDENTIFIER TK_EQ ^clrsmall#const_expression~
+     ;
+\end{Verbatim}
+
+\subsubsection{联合体和位段类型}
+
+联合体类似于
+
+\subsubsection{小结}
+
+前述结构体的对齐，
+联合体
+位段对齐。
+
+前述的几种类型定义的前面还可以跟关键字~private~和~public~，表明
+该类型可否被其他平级作用域所引用。
+
+前述结构体、联合体、位段的语法：
+
+\begin{Verbatim}[frame=single, commandchars=^\#\~]
+    ^clrsmall#struct_def~ :
+\end{Verbatim}
+
+\subsection{引用类型}
+
+引用类型的变量指该变量不直接存储所包含的值，而是指向它所要存储的值。
+它存储的是实际数据的引用地址。引用类型本身不能再有引用类型，即引用的
+引用是不允许的。
+
+引用类型包括直接定义、委托和数组。
+
+\subsubsection{直接定义}
+
+任何数据类型包括派生类型都可以定义对应的引用变量。但是引用类型本身
+不能定义对应的引用类型。如果有类似的编程需求，则可以将引用类型定义
+在结构中，然后使用结构的引用变量。
+
+\ttfamily
+\begin{lstlisting}
+    ref int a = null;
+    int b;
+    ref int c = ref(b);
+\end{lstlisting}
+\CJKfamily{song}
+
+和~C++~不同，~W~语言的引用可以指向空对象。~ref~是一个取引用的操作符，
+它可取得变量的引用地址并赋值给引用变量。
+
+正则表达式：
+
+\begin{Verbatim}[frame=single, commandchars=^\#\~]
+    ^clrbig#TK_KEY_NULL~   "null"
+    ^clrbig#TK_KEY_REF~    "ref"
+\end{Verbatim}
+
+\subsubsection{委托}
+
+在~C~和~C++~语言中，指针是它们最强有力的工具之一，同时又给他们带来
+很多苦恼之处。因为指针指向的数据类型可能并不相同，如你可能把~int~
+类型的指针指向一个~float~类型的变量，而这时程序并不会出错。若你
+删除了一个不应该被删除的指针，程序就有可能崩溃。可见，滥用指针给
+程序的安全性带来隐患。
+
+正因为如此，在~W~语言中取消了取消了指针这个概念。并且用引用来替代。
+尽管如此，为了使~W~语言能编写最底层的系统程序，如驱动程序，~W~语言
+仍然提供了语法，使得引用可以象指针一样操作，本身也可以参加运算和被
+强制转换。引用变量后也可以跟数组运算符号~[]~，因此可以当作数组名
+处理。这样的代码是不安全的，因此会在编译时作特别的提示。
+
+委托~(delegate)~相当于~C~语言中的函数指针原型。委托是类型安全的。
+委托的声明类似一般的函数声明，前面加~delegate~关键字，如：
+
+\ttfamily
+\begin{lstlisting}
+    delegate int MyDelegate();
+\end{lstlisting}
+\CJKfamily{song}
+
+以上声明了一个~MyDelegate~类型，在使用中需要利用这个类型来定义
+变量，并把合适的函数地址赋给它。委托变量只能和~int~变量相互
+强制转换。
+
+\ttfamily
+\begin{lstlisting}
+    MyDelegate d;
+    public int NormalMethod()
+    {
+        return 0;
+    }
+    d = NormalMethod;
+    d();
+\end{lstlisting}
+\CJKfamily{song}
+
+正则表达式：
+
+\begin{Verbatim}[frame=single, commandchars=^\#\~]
+    ^clrbig#TK_KEY_DELEGATE~ "delegate"
+\end{Verbatim}
+
+\subsubsection{数组}
+
+数组是进行批量处理数据的。数组是一组类型相同的有序数据。数组
+按数组名、数据元素的类型和维数来进行描述。
+
+在~W~语言子集中，我们只实现固定长度的数组。固定长度的数组
+定义格式：
+\begin{Verbatim}[frame=single, commandchars=^\#\~]
+    non-array-type[dim_separators] array-instance-name;
+\end{Verbatim}
+
+例如：
+\ttfamily
+\begin{lstlisting}
+    int[5] a;
+\end{lstlisting}
+\CJKfamily{song}
+
+实现时将在栈上分配相应的内存。如果要动态分配内存，则使用
+~walloc~函数，并将返回值赋给一个引用变量。如下所示：
+\ttfamily
+\begin{lstlisting}
+    ref int a = walloc(3*sizeof(int)) as ref int;
+\end{lstlisting}
+\CJKfamily{song}
+
+使用数组时，可以在~``[]''~中加入下标来取得对应的数组元素。
+数组元素的下标是从~0~开始的。第一个元素对应的下标是~0~，以后
+逐个增加。
+
+数组可以是多维的。而一维数组用的最普遍。下面是一个例子：
+\ttfamily
+\begin{lstlisting}
+    int[5] arr;
+    for(int i = 0; i < 5; i ++)
+        arr[i] = i * i;
+\end{lstlisting}
+\CJKfamily{song}
+
+这个程序创建了一个有~5~个~int~型元素组成的数组，并逐个赋值
+初始化。下面是多维数组的声明和例子：
+\ttfamily
+\begin{lstlisting}
+    int[2,3]   a;
+    int[4,2,3] b;
+\end{lstlisting}
+\CJKfamily{song}
+
+和~C~语言不同的是，各维数在一个~``[]''~内指明，用逗号隔开。使用
+多维数组时也使用相同的格式。其中第一个维数变化慢，最后一个元素
+变化快。对于二维数组，第一维就是行数，第二维就是列数。在内存中
+的存储布局是按行存储的。大于三维时，最后二维看成面，前面的维数
+指定了后面的面阵，并顺序存储。例如前例中的三维数组，在内存中的
+排列次序为：
+\ttfamily
+\begin{lstlisting}
+    b[0, 0, 0]  b[0, 0, 1]  b[0, 0, 2]
+    b[0, 1, 0]  b[0, 1, 1]  b[0, 1, 2]
+    b[1, 0, 0]  b[1, 0, 1]  b[1, 0, 2]
+    b[1, 1, 0]  b[1, 1, 1]  b[1, 1, 2]
+    b[2, 0, 0]  b[2, 0, 1]  b[2, 0, 2]
+    b[2, 1, 0]  b[2, 1, 1]  b[2, 1, 2]
+    b[3, 0, 0]  b[3, 0, 1]  b[3, 0, 2]
+    b[3, 1, 0]  b[3, 1, 1]  b[3, 1, 2]
+\end{lstlisting}
+\CJKfamily{song}
+
+多维数组前面部分维数可以看成一个引用变量。例如前面例子中的~a~是
+~$2\times 3$~的数组，那么可以把~a[0]~和~a[1]~都看成引用变量，同时
+也是一维数组名，数组长度都是~3~。上述数组名~a~或者~a[0]~可以被
+强制转化为基本类型的引用变量，从而可以象指针那样高效率地访问内存
+数据。
+
+注意：数组定义不能用~typedef~来取得它的别名。

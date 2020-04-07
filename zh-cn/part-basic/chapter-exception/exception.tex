@@ -1,0 +1,43 @@
+﻿%
+% Exception, XIN YUAN, 2020
+%
+
+\chapter{异常}
+
+SEH
+关键字
+封装办法
+
+函数方法后的throw()
+
+\ttfamily
+\begin{lstlisting}
+try
+catch()
+catch(...)
+CAtlException
+throw
+
+ATLTRY
+ATLCATCH
+ATLCATCHALL  catch(...)
+ATLTHROW
+ATLRETHROW
+
+#ifdef _ATL_DISABLE_NOTHROW
+#define ATL_NOTHROW
+#else
+#define ATL_NOTHROW __declspec(nothrow)
+#endif
+\end{lstlisting}
+
+捕获系统错 浮点错 溢出等 除零
+
+底层：包括公共模块和~DLL~引出函数和类
+用法 返回HRESULT   throw() 不使用抛出 若它内部调用
+已有该机制 则捕获 返回HRESULT
+高层EXE try catch 等
+函数/方法后的throw()说明throw(...)  throw(类型)
+重抛错误rethrow
+
+尽量不在构造函数和析构函数里抛出异常
