@@ -1,14 +1,74 @@
 ﻿%
-% Intel, XIN YUAN, 2020
+% GKC, XIN YUAN, 2020
 %
 
-\cnappendixchapter{Intel~指令集}
+\cnappendixchapter{GKC库}
 
-~80386~是支持多任务和虚拟寻址的~32~位芯片。~Intel~后来的芯片
-都是基于它开发的。因此这里详细介绍其指令集。
+GKC库是按照分层的思想设计的。而各个部件也是按层次逐步添加的。
 
-\section{386~指令集}
+\section{分层}
 
-\subsection{标志寄存器}
+GKC的程序编码分成四层，如表 \ref{tab:a-gkc:layers} 所示：
 
-~80386~的标志寄存器如图所示。
+\begin{table}[h]
+  \centering
+  \caption{层次列表}\label{tab:a-gkc:layers}
+\begin{tabular}{|l|p{3cm}|p{3cm}|p{3cm}|}
+  \hline
+  \textbf{层次} &  \textbf{描述} & \textbf{文件名规范} &  \textbf{程序命名规范}  \\
+  \hline\hline
+  用户  &  用户使用的接口  & 大写字母开头，大小写字母相间  &  大写字母开头，大小写字母相间  \\
+  \hline
+  用户内部层 & 用户内部使用的接口  & 下划线跟着大写字母开头，大小写字母相间  &  下划线跟着大写字母开头，大小写字母相间  \\
+  \hline
+  内部层  & 内部使用的接口  & 小写字母开头，全部小写，用下划线连接词  & 小写字母开头，全部小写，用下划线连接词  \\
+  \hline
+  系统内部层  & 操作系统相关的内部使用的接口  & 下划线跟着小写字母开头，全部小写，用下划线连接词  & 下划线跟着小写字母开头，全部小写，用下划线连接词  \\
+  \hline
+\end{tabular}
+
+\end{table}
+
+每个层都可以调用本层和其下层提供的类和函数接口。
+
+\section{部件}
+
+GKC的各个部件也是分层生成的。
+
+\subsection{base}
+
+在文件夹 public/include/base 下是最基础的程序，封装了操作系统相关的一些数据类型，
+和一些方便的函数。文件 GkcDef.h 则包含了这些基本的头文件，并提供一些接口。
+其他文件提供了常用的数据结构和各种不同类型工程需要的程序。
+
+\subsection{sys}
+
+文件夹 RT 下是运行时库的工程，产生共享的装配件，在 windows 下是动态链接库，
+在 Linux 下是共享库对象。这些共享的装配件属于用户内部层，所以它们的对外公开接口文件是用下划线开头的命名，
+提供的类和函数也是用下划线开头的命名。它们在实现共享装配件的程序中被使用。
+
+文件夹 RT 下的 GkcSys 工程是基本的运行时库，提供了方便的函数，以及一些组件对象的创建函数。
+它使用了base下的头文件来实现。RT/GkcSys/public 下的 \_GkcSys.h 提供对外的类和函数。
+
+文件夹 public/include/sys 属于用户层，因而提供了对应的文件 GkcSys.h，
+封装了用户内部层的 \_GkcSys.h 里的类和函数。该文件夹下的其他文件都是基于 GkcSys.h 和 base 下的头文件来实现的类和函数。
+
+\subsection{compiler}
+
+文件夹 RT 下的 GkcCompiler 工程是实现编译器的运行时库，包括词法分析、语法分析、抽象语法树等。
+它使用了base，sys下的头文件来实现。RT/GkcCompiler/public 下的 \_GkcCompiler.h 提供对外的类和函数。
+
+文件夹 public/include/compiler 属于用户层，因而提供了对应的文件 GkcCompiler.h，
+封装了用户内部层的 \_GkcCompiler.h 里的类和函数。
+
+\subsection{parser}
+
+文件夹 RT 下的 GkcParser 工程是实现几种语言编译器的运行时库，包括wlang，won，wmark等。
+它使用了base，sys，compiler下的头文件来实现。RT/GkcParser/public 下的 \_GkcParser.h 提供对外的类和函数。
+
+文件夹 public/include/parser 属于用户层，因而提供了对应的文件 GkcParser.h，
+封装了用户内部层的 \_GkcParser.h 里的类和函数。
+
+\subsection{ui}
+
+文件夹 public/include/ui 下提供编写界面程序需要的类和函数，可以使用base，sys下的头文件。
